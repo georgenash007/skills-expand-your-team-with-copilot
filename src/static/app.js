@@ -612,10 +612,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailButton = activityCard.querySelector(".email-share");
     const copyLinkButton = activityCard.querySelector(".copy-link");
 
-    facebookButton.addEventListener("click", () => shareOnFacebook(name, details));
-    twitterButton.addEventListener("click", () => shareOnTwitter(name, details));
-    emailButton.addEventListener("click", () => shareViaEmail(name, details));
-    copyLinkButton.addEventListener("click", () => copyActivityLink(name));
+    if (facebookButton) {
+      facebookButton.addEventListener("click", () => shareOnFacebook(name, details));
+    }
+    if (twitterButton) {
+      twitterButton.addEventListener("click", () => shareOnTwitter(name, details));
+    }
+    if (emailButton) {
+      emailButton.addEventListener("click", () => shareViaEmail(name, details));
+    }
+    if (copyLinkButton) {
+      copyLinkButton.addEventListener("click", () => copyActivityLink(name));
+    }
 
     activitiesList.appendChild(activityCard);
   }
@@ -886,15 +894,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Social sharing functions
+  function getActivityUrl(activityName) {
+    const baseUrl = window.location.href.split('#')[0];
+    return `${baseUrl}#${encodeURIComponent(activityName)}`;
+  }
+
   function shareOnFacebook(activityName, details) {
-    const url = encodeURIComponent(window.location.href);
+    const url = encodeURIComponent(getActivityUrl(activityName));
     const text = encodeURIComponent(`Check out ${activityName} at Mergington High School! ${details.description}`);
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
     window.open(facebookUrl, "_blank", "width=600,height=400");
   }
 
   function shareOnTwitter(activityName, details) {
-    const url = encodeURIComponent(window.location.href);
+    const url = encodeURIComponent(getActivityUrl(activityName));
     const schedule = formatSchedule(details);
     const text = encodeURIComponent(`Join ${activityName} at Mergington High School! ${schedule}`);
     const twitterUrl = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
@@ -902,6 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function shareViaEmail(activityName, details) {
+    const activityUrl = getActivityUrl(activityName);
     const schedule = formatSchedule(details);
     const subject = encodeURIComponent(`Check out ${activityName} at Mergington High School`);
     const body = encodeURIComponent(
@@ -910,14 +924,14 @@ document.addEventListener("DOMContentLoaded", () => {
       `Description: ${details.description}\n` +
       `Schedule: ${schedule}\n` +
       `Available Spots: ${details.max_participants - details.participants.length} out of ${details.max_participants}\n\n` +
-      `Check it out here: ${window.location.href}\n\n` +
+      `Check it out here: ${activityUrl}\n\n` +
       `Best regards`
     );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
   function copyActivityLink(activityName) {
-    const url = window.location.href;
+    const url = getActivityUrl(activityName);
     
     // Try to use the modern Clipboard API
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -935,7 +949,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.style.position = "fixed";
-    textArea.style.left = "-999999px";
+    textArea.style.top = "-9999px";
+    textArea.style.left = "0";
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
